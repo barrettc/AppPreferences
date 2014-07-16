@@ -1,4 +1,4 @@
-package com.simonmacdonald.prefs;
+package com.amchealth.prefs;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -10,6 +10,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -19,19 +20,21 @@ import android.util.Log;
 
 public class AppPreferences extends CordovaPlugin {
 
-    private static final String LOG_TAG = "AppPrefs";
+    private static final String TAG = AppPreferences.class.getSimpleName();
     private static final int NO_PROPERTY = 0;
     private static final int NO_PREFERENCE_ACTIVITY = 1;
 	
 	private static final int SHOW_PREFERENCEACTIVITY_INTENT = 1;
     private CallbackContext auxCtx;
     
+    private static final String PREFERENCE_NAME = "ClinicalTrials";
+    
     @Override
     public boolean execute(String action, JSONArray args, CallbackContext callbackContext) {
         PluginResult.Status status = PluginResult.Status.OK;
         String result = "";
 
-        SharedPreferences sharedPrefs = PreferenceManager.getDefaultSharedPreferences(this.cordova.getActivity());
+        SharedPreferences sharedPrefs = this.cordova.getActivity().getSharedPreferences(PREFERENCE_NAME, Activity.MODE_PRIVATE);
 
         try {
             if (action.equals("get")) {
@@ -44,13 +47,14 @@ public class AppPreferences extends CordovaPlugin {
                 }
             } else if (action.equals("set")) {
                 String key = args.getString(0);
-                String value = args.getString(1);               
+                String value = args.getString(1);
+                Log.d(TAG, "setting key: " + key + " value: " + value);
                 Editor editor = sharedPrefs.edit();
                 if ("true".equals(value.toLowerCase()) || "false".equals(value.toLowerCase())) {
                     editor.putBoolean(key, Boolean.parseBoolean(value));
                 } else {
                     editor.putString(key, value);
-                }
+                }                
                 callbackContext.sendPluginResult(new PluginResult(status, editor.commit()));               
             } else if (action.equals("load")) {
             	
